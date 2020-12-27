@@ -1,0 +1,7 @@
+*.log
+es1.py
+es2.py
+es_config.py
+known_devices.yml
+old/
+__pycache__/
