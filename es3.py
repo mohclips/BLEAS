@@ -48,10 +48,10 @@ from types import FunctionType
 
 def attributes(obj):
     disallowed_names = {
-      name for name, value in getmembers(type(obj)) 
+      name for name, value in getmembers(type(obj))
         if isinstance(value, FunctionType)}
     return {
-      name: getattr(obj, name) for name in dir(obj) 
+      name: getattr(obj, name) for name in dir(obj)
         if name[0] != '_' and name not in disallowed_names and hasattr(obj, name)}
 
 def print_attributes(obj):
@@ -91,7 +91,7 @@ def get_manufacturer(device):
             name = "Unknown: "+hex(mf_id)
         return name
 
-    return "Unknown - no manufacturer data"  
+    return "Unknown - no manufacturer data"
     # UUIDs in AdvertisementData are service_uuids
 
 def get_known_device(device):
@@ -125,14 +125,14 @@ def print_details(device: BLEDevice, advertisement_data: AdvertisementData):
     #if device.address != 'CD:B1:46:3D:B8:71':
         # add to DB
         #devices.append(device.address)
-    
-        
-    
+
+
+
     kd = get_known_device(device)
     #print("Known device: " + kd)
 
     # current date and time
-    ct = datetime.datetime.now() 
+    ct = datetime.datetime.now()
     #print("current time:-", ct)
 
     #print(device.address, "RSSI:", device.rssi)
@@ -155,7 +155,7 @@ def print_details(device: BLEDevice, advertisement_data: AdvertisementData):
 
     else:
         #TODO: record first seen, last seen, occurrances
-        
+
         #TODO: work out service uuids
 
         manufacturer = get_manufacturer(device)
@@ -210,7 +210,7 @@ def print_details(device: BLEDevice, advertisement_data: AdvertisementData):
         send_event = True
         #print("new")
     else: # exists so check
-        old = devices[device.address]['last_seen']     
+        old = devices[device.address]['last_seen']
         #time_diff = (new - old).total_seconds()
         time_diff = (new - old)
         #print(time_diff)
@@ -264,9 +264,13 @@ def print_details(device: BLEDevice, advertisement_data: AdvertisementData):
             # non-NHS - we store every event, to a new doc
 
             print("==============================================================================================")
-            print("current time:-", str(ct))    
+            print("current time:-", str(ct))
             add_details(device,'@timestamp',es_dt)# for ES
-            
+
+            #TODO: drop superflouous fields
+            # 'Paired': False, 'Trusted': False, 'Blocked': False, 'LegacyPairing': False,
+            #  'Connected': False,
+
             try:
                 res = es.index(index="bluetooth-alias", body=device.details)
                 print("ES:",res['result'], res['_id'])
@@ -279,14 +283,14 @@ def print_details(device: BLEDevice, advertisement_data: AdvertisementData):
             # cleanup
             device.details.pop('Apple',None)
             device.details.pop('Microsoft',None)
-            
-            
+
+
 
 async def run():
 
     scanner = BleakScanner()
     scanner.register_detection_callback(print_details)
-    
+
     print("+ Run Scanner")
 
 
@@ -306,7 +310,7 @@ async def run():
         #         #await print_services(device.address)
 
 
-        
+
 
 #
 # Main
