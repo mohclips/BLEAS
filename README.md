@@ -19,4 +19,3 @@ All data is saved into an ElasticSearch cluster, this enables better search and 
 ## Privacy
 
 It is possible to track users with this data as can be seen in the predecessor works, though no attempt has been to do this, and others using this code should not exercise this feature.
-

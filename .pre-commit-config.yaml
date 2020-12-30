@@ -1,6 +1,11 @@
 
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
+# Apply to all files without commiting:
+#   pre-commit run --all-files
+# Update this file:
+#   pre-commit autoupdate
+
 ---
 default_language_version:
   # force all unspecified python hooks to run python3
@@ -22,5 +27,7 @@ repos:
       args: ['--fix', 'lf']
     - id: check-json
     - id: check-yaml
-
-
+    - id: debug-statements
+    #- id: detect-aws-credentials
+    - id: detect-private-key
+    - id: end-of-file-fixer

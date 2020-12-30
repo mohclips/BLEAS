@@ -2,10 +2,10 @@
 
 
 #https://github.com/Disasm/Gadgetbridge/blob/fe9ec9b88adb454150bf7bd6c1a8309ba0a69ae3/app/src/main/java/nodomain/freeyourgadget/gadgetbridge/devices/id115/ID115Constants.java#L12
-00000af0-0000-1000-8000-00805f9b34fb: 
+00000af0-0000-1000-8000-00805f9b34fb:
   name: ID115 plus HR - smartwatch base uuid
 
-cbbfe0e1-f7f3-4206-84e0-84cbb3d09dfc: 
+cbbfe0e1-f7f3-4206-84e0-84cbb3d09dfc:
   name: Common but unknown audio/visual uuid
 
 0000feed-0000-1000-8000-00805f9b34fb:

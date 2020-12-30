@@ -1,6 +1,6 @@
 # see https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-cdp/77b446d0-8cea-4821-ad21-fabdf4d9a569
 
-# Beacon Data (24 bytes): The beacon data section is further broken down. 
+# Beacon Data (24 bytes): The beacon data section is further broken down.
 # Note that the Scenario and Subtype Specific Data section requirements will differ based on the Scenario and Subtype.
 
 # byte 0 = Scenario Type = Scenario Type (1 byte): Set to 1
@@ -29,7 +29,7 @@ def __add_details(device,detail,value):
 def do_microsoft_decode(device):
     mf_id = next(iter(device.details['ManufacturerData']))
     mf_data=device.details['ManufacturerData'][mf_id]
-    
+
     # eg. 1, 9, 32, 2,
 
     scenario_type = mf_data[0]  # Set to 1
@@ -47,10 +47,10 @@ def do_microsoft_decode(device):
     vf = version_flags & 0b00100000 # always 32 ?
 
     reserved = mf_data[3]
-    
+
     _salt = mf_data[4:7] # Salt (4 bytes): Four random bytes.
     salt = ''.join(format(x,'x') for x in _salt)
-    
+
     _sha256 = mf_data[8:]  # Device Hash (24 bytes): SHA256 Hash of Salt plus Device Thumbprint. Truncated to 16 bytes.
     sha256 = ''.join(format(x,'x') for x in _sha256)
 
@@ -68,4 +68,3 @@ def do_microsoft_decode(device):
     }
 
     __add_details(device,'Microsoft',Microsoft)
-

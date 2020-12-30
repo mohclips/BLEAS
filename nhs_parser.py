@@ -50,4 +50,3 @@ def do_nhs_decode(device):
 
     # overwrite known device
     device.details['Common']['known_device'] = 'NHS contact app'
-    
