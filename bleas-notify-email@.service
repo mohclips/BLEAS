@@ -1,0 +1,10 @@
+# /etc/systemd/system/bleas-notify-email@.service
+
+#added "&& /usr/sbin/exim4 -qf" as exim on kali would not send unless forced
+
+[Unit]
+Description=%i failure email notification
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c '/bin/systemctl status %i | /usr/bin/mailx -s "[%i] failure notification" root && /usr/sbin/exim4 -qf'

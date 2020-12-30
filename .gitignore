@@ -6,3 +6,5 @@ known_devices.yml
 old/
 __pycache__/
 .secrets.baseline
+sudopass
+bleas.service

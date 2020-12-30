@@ -1,0 +1,25 @@
+# /lib/systemd/system/bleas.service
+
+[Unit]
+Description=Bluetooth Advertisement Scanner
+After=network.target
+OnFailure=bleas-notify-email@%i.service
+
+StartLimitInterval=200
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=someuser
+SyslogIdentifier=blas
+LimitNOFILE=65536
+ExecStart=/opt/ble_scanner/run.sh r
+#ExecStartPost=/opt/ble_scanner/run.sh
+ExecStop=/opt/ble_scanner/run.sh s
+
+Restart=on-failure
+RestartSec=60s
+
+
+[Install]
+WantedBy=multi-user.target
