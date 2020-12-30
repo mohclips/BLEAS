@@ -213,45 +213,49 @@ def process_nearby_action(data):
     # https://github.com/furiousMAC/continuity/blob/master/messages/nearby_action.md
 
     Apple = {}
-    _action_flags = data[0]
-    _action_type = data[1] # 0x8 = wifi_join
-    
-    #print(_action_flags)
-    #print(hex(_action_type))
 
-    try:
-        action_type = nearby_action_types[_action_type]
-    except Exception as e:
-        action_type = "unknown"
+    if len(data) > 2:
+
+        _action_flags = data[0]
+        _action_type = data[1] # 0x8 = wifi_join
+
+        #print(_action_flags)
+        #print(hex(_action_type))
+
+        try:
+            action_type = nearby_action_types[_action_type]
+        except Exception as e:
+            action_type = "unknown"
 
 
-    if _action_type == 0x08:
-        auth_tag = data[2] << 16 | data[3] << 8 | data[4]
+        if _action_type == 0x08:
+            auth_tag = data[2] << 16 | data[3] << 8 | data[4]
 
-        appleID =  hex(data[5] << 16 | data[6] << 8 | data[7])        # sha256
-        phoneNum = hex(data[8] << 16 | data[9] << 8 | data[10])       # sha256
-        email =    hex(data[11] << 16 | data[12] << 8 | data[13])     # sha256
-        ssid =     hex(data[14] << 16 | data[15] << 8 | data[16])     # sha256
-    
-        Apple = {
-            'nearby_action': {
-                'action_type': action_type,
-                '_action_type': _action_type,
-                'auth_tag': auth_tag,
-                'appleID': appleID,
-                'phoneNum': phoneNum,
-                'email': email,
-                'ssid': ssid 
+            appleID =  hex(data[5] << 16 | data[6] << 8 | data[7])        # sha256
+            phoneNum = hex(data[8] << 16 | data[9] << 8 | data[10])       # sha256
+            email =    hex(data[11] << 16 | data[12] << 8 | data[13])     # sha256
+            ssid =     hex(data[14] << 16 | data[15] << 8 | data[16])     # sha256
+
+            Apple = {
+                'nearby_action': {
+                    'action_type': action_type,
+                    '_action_type': _action_type,
+                    'auth_tag': auth_tag,
+                    'appleID': appleID,
+                    'phoneNum': phoneNum,
+                    'email': email,
+                    'ssid': ssid
+                }
             }
-        }
-    else:
-        Apple = {
-            'nearby_action': {
-                'action_type': action_type,
-                '_action_type': _action_type,
-                'payload': data[2:]
+        else:
+            Apple = {
+                'nearby_action': {
+                    'action_type': action_type,
+                    '_action_type': _action_type,
+                    'payload': data[2:]
+                }
             }
-        }
+
     return Apple
 
 def process_hey_siri(data):
@@ -260,7 +264,7 @@ def process_hey_siri(data):
     Apple = {}
     _action_flags = data[0]
     _action_type = data[1] # 0x8 = wifi_join
-    
+
     try:
         action_type = nearby_action_types[_action_type]
     except Exception as e:
@@ -277,7 +281,7 @@ def process_hey_siri(data):
         except Exception as e:
             device_class = "unknown"
 
-        
+
         unknown = data[8] # random data byte supposedly?
 
         Apple = {
@@ -289,7 +293,7 @@ def process_hey_siri(data):
                 'confidence': confidence,
                 'device_class': device_class,
                 '_device_class': _device_class,
-                'unknown': unknown 
+                'unknown': unknown
             }
         }
     else:
@@ -310,14 +314,14 @@ def process_airpods(data):
 
     _undef1 = data[0]    # 0x01
     _device_model = data[1] << 8 | data[2]
-    _status = data[3] 
+    _status = data[3]
     _batteryRL = data[4]
     _power = data[5]    # '? C R L xxxx' xxxx = case battery
     _lid = data[6]
     _color = data[7]
     _undef2 = data[8]   # 0x00
     _payload = data[9:]
-    
+
     batteryR = (data[4] & 0b11110000) >> 4
     batteryL = (data[4] & 0b00001111)
 
@@ -384,23 +388,23 @@ def do_apple_decode(device):
     except Exception as e:
         device_action = "Unknown"
 
-    if device_action == 'nearby': 
+    if device_action == 'nearby':
         # nearby
         Apple = process_nearby(data)
-   
-    elif device_action == 'handoff': 
+
+    elif device_action == 'handoff':
         # handoff
         Apple = process_handoff(data)
 
-    elif device_action == 'nearby_action': 
+    elif device_action == 'nearby_action':
         # nearby_action
         Apple = process_nearby_action(data)
 
-    elif device_action == 'hey_siri': 
+    elif device_action == 'hey_siri':
         # hey_siri
         Apple = process_hey_siri(data)
-    
-    elif device_action == 'airpods': 
+
+    elif device_action == 'airpods':
         # airpods
         Apple = process_airpods(data)
     else:
