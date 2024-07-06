@@ -1,17 +1,18 @@
+from bleak.backends.scanner import AdvertisementData
 
 # private method to add to the device details dict
 def __add_details(device,detail,value):
     device.details[detail] = value
 
-def isNHSapp(device):
-    if device.details['UUIDs']:
-        for uuid in device.details['UUIDs']:
+def isNHSapp(advertisement_data: AdvertisementData):
+    if advertisement_data.service_uuids:
+        for uuid in advertisement_data.service_uuids:
             if uuid == '0000fd6f-0000-1000-8000-00805f9b34fb':
                 return True
     return False
 
 
-def do_nhs_decode(device):
+def do_nhs_decode(device, advertisement_data: AdvertisementData):
 
     # https://en.wikipedia.org/wiki/Exposure_Notification
     # https://github.com/nhsx/covid-19-app-android-ag-public
@@ -34,8 +35,8 @@ def do_nhs_decode(device):
     #     iii. Byte 2 — Reserved for future use.
     #     iv. Byte 3 — Reserved for future use.
 
-    nhs_id = next(iter(device.details['ServiceData']))
-    nhs_data=device.details['ServiceData'][nhs_id]
+    nhs_id = next(iter(advertisement_data.service_data))
+    nhs_data=advertisement_data.service_data[nhs_id]
 
     RPI = ''.join(format(x,'x') for x in nhs_data[0:15])
     #print('Rolling Proximity Identifier: [{}]'.format(RPI))

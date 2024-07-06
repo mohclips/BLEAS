@@ -8,3 +8,11 @@ __pycache__/
 .secrets.baseline
 sudopass
 bleas.service
+
+.sudopass
+.vscode/
+JSON.md
+a.json
+unknown-manf.txt
+
+

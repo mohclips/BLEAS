@@ -1,3 +1,5 @@
+from bleak.backends.scanner import AdvertisementData
+
 # see https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-cdp/77b446d0-8cea-4821-ad21-fabdf4d9a569
 
 # Beacon Data (24 bytes): The beacon data section is further broken down.
@@ -26,9 +28,9 @@ microsoft_device = {
 def __add_details(device,detail,value):
     device.details[detail] = value
 
-def do_microsoft_decode(device):
-    mf_id = next(iter(device.details['ManufacturerData']))
-    mf_data=device.details['ManufacturerData'][mf_id]
+def do_microsoft_decode(device,advertisement_data: AdvertisementData):
+    mf_id = next(iter(advertisement_data.manufacturer_data))
+    mf_data=advertisement_data.manufacturer_data[mf_id]
 
     # eg. 1, 9, 32, 2,
 

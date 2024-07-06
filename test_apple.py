@@ -1,5 +1,6 @@
 #python3
 
+from bleak.backends.scanner import AdvertisementData
 from apple_parser import do_apple_decode
 
 test_data = [
@@ -95,10 +96,12 @@ test_data = [
 # [ 2,21,80,118,92,183,217,234,78,33,153,164,250,135,150,19,164,146,141,154,239,101,206],
 
 # airpods
-[7, 25, 1, 11, 32, 34, 249, 143, 0, 17, 4, 171, 252, 237, 79, 93, 172, 126, 105, 224, 8, 47, 188, 53, 240, 17, 93],
-[7, 25, 1, 15, 32, 43, 153, 143, 1, 0, 5, 138, 142, 224, 142, 30, 67, 224, 22, 8, 113, 169, 54, 133, 130, 213, 223],
-[7, 25, 1, 6, 32, 0, 246, 143, 0, 8, 0, 192, 110, 116, 205, 168, 109, 111, 116, 3, 29, 195, 253, 96, 52, 2, 134],
+# [7, 25, 1, 11, 32, 34, 249, 143, 0, 17, 4, 171, 252, 237, 79, 93, 172, 126, 105, 224, 8, 47, 188, 53, 240, 17, 93],
+# [7, 25, 1, 15, 32, 43, 153, 143, 1, 0, 5, 138, 142, 224, 142, 30, 67, 224, 22, 8, 113, 169, 54, 133, 130, 213, 223],
+# [7, 25, 1, 6, 32, 0, 246, 143, 0, 8, 0, 192, 110, 116, 205, 168, 109, 111, 116, 3, 29, 195, 253, 96, 52, 2, 134],
 
+# ibeacon
+[ '02', '15', '50', '76', '5c', 'b7', 'd9', 'ea', '4e', '21', '99', 'a4', 'fa', '87', '96', '13', 'a4', '92', '8d', '9a', 'ef', '65', 'ce'],
 
 ] # end
 
@@ -125,15 +128,30 @@ class DEV:
         'ManufacturerData': {}
     }
 
+class AD:
+    manufacturer_data: {}
 
 for a in test_data:
     print("-------------------------------------------------------------------------")
 
+    print(f'test a: {type(a)} {type(a[0])} {a[0]}')
+    if type(a[0]) != "int":
+        # convert hex str list to int list
+        z=[]
+        for x in a:
+            b = int(x,16)
+            z.append(b)
+        a=z
+
+
     device = DEV
     device.details['ManufacturerData'] = { 76: a }
 
-    print(device.details['ManufacturerData'])
+    print(f"test device_details: {device.details['ManufacturerData']}")
 
-    do_apple_decode(device)
+    advertisement_data = AD
+    advertisement_data.manufacturer_data = { 76: a }
+    do_apple_decode(device, advertisement_data)
 
+    print('test print  attr')
     print_attributes(device)

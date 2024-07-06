@@ -1,9 +1,17 @@
+from bleak.backends.scanner import AdvertisementData
+
+from uuid import UUID
+
+from construct import Array, Byte, Const, Int8sl, Int16ub, Struct
+from construct.core import ConstError
+
+
 # https://github.com/furiousMAC/continuity
 
 # https://github.com/hexway/apple_bleee/blob/1f8022959be660b561e6004b808dd93fa252bc90/ble_read_state.py#L387
 ble_packets_types = {
     0x01: 'unknown 0x01',
-    0x02: 'unknown 0x02',
+    0x02: 'ibeacon',            # https://koen.vervloesem.eu/blog/decoding-bluetooth-low-energy-advertisements-with-python-bleak-and-construct/
     0x03: 'airprint',           # https://github.com/furiousMAC/continuity/blob/master/messages/airprint.md
     0x04: 'unknown 0x04',
     0x05: 'airdrop',
@@ -110,6 +118,12 @@ airpod_devices = {
 }
 
 
+def bytes_to_str(ba):
+    payload = ''
+    for d in ba:
+        payload += f'{d:02x}'
+    return payload
+
 # private method to add to the device details dict
 def __add_details(device,detail,value):
     device.details[detail] = value
@@ -148,6 +162,50 @@ def parse_os_wifi_code(code, dev):
     else:
         return ('', '')
 
+
+def process_ibeacon(ldata):
+
+    data = bytes(ldata)
+
+    # define the structure the packet
+    ibeacon_format = Struct(
+    "type_length" / Const(b"\x02\x15"),
+    "uuid" / Array(16, Byte),
+    "major" / Int16ub,
+    "minor" / Int16ub,
+    "power" / Int8sl,
+)
+    # define the output
+    Apple = {
+        'ibeacon' : {
+            'uuid': '',
+            'major': 0,
+            'minor': 0,
+            'power_dBm': 0,
+
+        }
+    }
+
+    """Decode iBeacon."""
+    try:
+        # parse the packet
+        ibeacon = ibeacon_format.parse(bytes(data))
+        uuid = UUID(bytes=bytes(ibeacon.uuid))
+
+        # fill in the output
+        Apple['ibeacon']['uuid'] = str(uuid)
+        Apple['ibeacon']['major'] = ibeacon.major
+        Apple['ibeacon']['minor'] = ibeacon.minor
+        Apple['ibeacon']['power_dBm'] = ibeacon.power
+
+    except KeyError:
+        print('DEBUG: Apple company ID (0x004c) not found')
+        pass
+    except ConstError:
+        print('DEBUG: No iBeacon (type 0x02 and length 0x15)')
+        pass
+
+    return Apple
 
 def process_nearby(data):
     phone_state_id = 0xff
@@ -195,7 +253,7 @@ def process_handoff(data):
     clipboard_status = False if data[0] == 0 else True
     seq_num = hex(data[1] << 8 | data[2])
     gcm_auth = hex(data[3])
-    payload = data[4:]
+    payload = bytes_to_str(data[4:])
 
     Apple = {
         'handoff': {
@@ -252,7 +310,7 @@ def process_nearby_action(data):
                 'nearby_action': {
                     'action_type': action_type,
                     '_action_type': _action_type,
-                    'payload': data[2:]
+                    'payload': bytes_to_str(data[2:])
                 }
             }
 
@@ -301,7 +359,7 @@ def process_hey_siri(data):
             'hey_siri': {
                 'action_type': action_type,
                 '_action_type': _action_type,
-                'payload': data[2:]
+                'payload': bytes_to_str(data[2:])
             }
         }
     return Apple
@@ -320,7 +378,7 @@ def process_airpods(data):
     _lid = data[6]
     _color = data[7]
     _undef2 = data[8]   # 0x00
-    _payload = data[9:]
+    _payload = bytes_to_str(data[9:])
 
     batteryR = (data[4] & 0b11110000) >> 4
     batteryL = (data[4] & 0b00001111)
@@ -365,11 +423,15 @@ def process_airpods(data):
 
 
 ###########################################################################################
-def do_apple_decode(device):
-    mf_id = next(iter(device.details['ManufacturerData']))
-    mf_data=device.details['ManufacturerData'][mf_id]
+def do_apple_decode(device,advertisement_data: AdvertisementData):
+    mf_id = next(iter(advertisement_data.manufacturer_data))
+    mf_data=advertisement_data.manufacturer_data[mf_id]
     # https://github.com/hexway/apple_bleee/blob/master/ble_read_state.py
     # https://github.com/furiousMAC/continuity/blob/master/messages/nearby_info.md
+
+    #print(f'mf_id:{mf_id}')
+
+    #print(f'mf_data:{mf_data}')
 
     action = mf_data[0]
     length = mf_data[1]
@@ -388,7 +450,11 @@ def do_apple_decode(device):
     except Exception as e:
         device_action = "Unknown"
 
-    if device_action == 'nearby':
+    if device_action == 'ibeacon':
+        # nearby
+        Apple = process_ibeacon(mf_data) # used construsts
+
+    elif device_action == 'nearby':
         # nearby
         Apple = process_nearby(data)
 
@@ -408,7 +474,7 @@ def do_apple_decode(device):
         # airpods
         Apple = process_airpods(data)
     else:
-        print('WARNING: No parser for action',hex(action))
+        print('WARNING: No parser for Apple action',hex(action))
 
 
 

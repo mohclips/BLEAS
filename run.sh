@@ -3,13 +3,15 @@
 RESET=$1
 shift
 
+clear
+
 DATE=$(date)
 echo "+ Running startup script at $DATE"
 
 
-cd /home/nick/workspaces/ble_scanner/
+#cd /home/nick/workspaces/ble_scanner/
 
-SUDOPASS=$(cat ./sudopass)
+SUDOPASS=$(cat .sudopass)
 
 if [[ ! -z $RESET ]] ; then
     echo "+ reset usb port"
@@ -23,4 +25,4 @@ if [[ ! -z $RESET ]] ; then
 fi
 
 echo "+ running..."
-/usr/bin/python3 -u ./es3.py 2>&1 > ./bt3.log
+/usr/bin/python3 -u ./main.py 2>&1 | tee ./run-$(date +'%s').log
