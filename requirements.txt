@@ -1,0 +1,6 @@
+bleak==0.22.2
+construct==2.10.70
+dbus-fast==2.22.1
+Pygments==2.18.0
+PyYAML==6.0.1
+typing_extensions==4.12.2

@@ -25,4 +25,4 @@ if [[ ! -z $RESET ]] ; then
 fi
 
 echo "+ running..."
-/usr/bin/python3 -u ./main.py 2>&1 | tee ./run-$(date +'%s').log
+python3 -u ./main.py 2>&1 | tee ./run-$(date +'%s').log
